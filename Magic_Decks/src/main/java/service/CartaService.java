@@ -10,7 +10,7 @@ import java.util.stream.Collectors;
 public class CartaService {
 
     // Método para buscar uma carta por nome
-    public Carta buscarCartaPorNome(String nome) {
+   /* public Carta buscarCartaPorNome(String nome) {
         System.out.println("Fazendo chamada para a API para buscar carta por nome: " + nome);
 
         try {
@@ -31,7 +31,7 @@ public class CartaService {
             e.printStackTrace();
             return null;
         }
-    }
+    }*/
 
     public Carta buscarCartaPorId(int multiverseId) {
         try {
@@ -48,13 +48,13 @@ public class CartaService {
     }
 
     // Método para buscar todas as cartas de um determinado tipo
-    public List<Carta> buscarCartasPorTipo(String tipo) {
+    /*public List<Carta> buscarCartasPorTipo(String tipo) {
         List<Card> cards = CardAPI.getAllCards();
         return cards.stream()
                 .filter(c -> c.getType().equalsIgnoreCase(tipo))
                 .map(this::converterParaModelo)
                 .collect(Collectors.toList());
-    }
+    }*/
 
     // Método auxiliar para converter uma carta da API para o modelo Carta
     private Carta converterParaModelo(Card card) {

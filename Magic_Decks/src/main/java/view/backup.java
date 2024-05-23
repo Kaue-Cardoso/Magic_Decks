@@ -1,13 +1,13 @@
+/*
 package view;
 
 import model.Deck;
-import repository.DeckRepository;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 
 public class Main {
-    private static DeckRepository deckRepository = new DeckRepository();
+    private static List<Deck> decks = new ArrayList<>();
     private static Scanner scanner = new Scanner(System.in);
 
     public static void main(String[] args) {
@@ -48,12 +48,12 @@ public class Main {
         System.out.println("Digite o nome do novo deck:");
         String nome = scanner.nextLine();
         Deck deck = new Deck(nome);
-        deckRepository.adicionarDeck(deck);
+        decks.add(deck);
         System.out.println("Deck '" + nome + "' adicionado com sucesso.");
     }
 
     private static void selecionarDeckParaEditar() {
-        if (deckRepository.isEmpty()) {
+        if (decks.isEmpty()) {
             System.out.println("Nenhum deck disponível para editar.");
             return;
         }
@@ -64,17 +64,17 @@ public class Main {
         int indiceDeck = scanner.nextInt();
         scanner.nextLine(); // Limpar o buffer do scanner
 
-        Deck deck = deckRepository.obterDeck(indiceDeck);
-        if (deck == null) {
+        if (indiceDeck < 0 || indiceDeck >= decks.size()) {
             System.out.println("Índice inválido.");
             return;
         }
 
+        Deck deck = decks.get(indiceDeck);
         DeckView.editarDeck(deck);
     }
 
     private static void apagarDeck() {
-        if (deckRepository.isEmpty()) {
+        if (decks.isEmpty()) {
             System.out.println("Nenhum deck disponível para apagar.");
             return;
         }
@@ -85,18 +85,16 @@ public class Main {
         int indiceDeck = scanner.nextInt();
         scanner.nextLine(); // Limpar o buffer do scanner
 
-        Deck deck = deckRepository.obterDeck(indiceDeck);
-        if (deck == null) {
+        if (indiceDeck < 0 || indiceDeck >= decks.size()) {
             System.out.println("Índice inválido.");
             return;
         }
 
-        deckRepository.apagarDeck(indiceDeck);
+        Deck deck = decks.remove(indiceDeck);
         System.out.println("Deck '" + deck.getNome() + "' apagado com sucesso.");
     }
 
     private static void listarDecks() {
-        List<Deck> decks = deckRepository.listarDecks();
         if (decks.isEmpty()) {
             System.out.println("Nenhum deck criado.");
             return;
@@ -109,3 +107,4 @@ public class Main {
         }
     }
 }
+*/

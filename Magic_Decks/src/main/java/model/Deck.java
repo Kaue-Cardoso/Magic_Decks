@@ -1,7 +1,5 @@
 package model;
 
-import model.Carta;
-
 import java.util.ArrayList;
 import java.util.List;
 
