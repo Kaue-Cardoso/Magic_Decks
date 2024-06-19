@@ -1,22 +1,45 @@
 package model;
 
+import javax.persistence.*;
 import java.util.List;
+import javax.persistence.Table;
+import javax.persistence.Entity;
 
+import model.Deck;
+
+@Entity
+@Table(name = "Carta")
 public class Carta {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "carta_id")
+    private Long id;
+    @Column(name = "nome_carta")
     private String name;
+    @Column(name = "manaCost")
     private String manaCost;
+    @Column(name = "cmc")
     private double cmc;
+    @Column(name = "colors")
     private String[] colors;
+    @Column(name = "type")
     private String type;
+    @Column(name = "description")
     private String description;
+    @Column(name = "power")
     private String power;
+    @Column(name = "toughness")
     private String toughness;
+    @ManyToOne
+    @JoinColumn(name = "fk_deck_id")
+    private Deck deck;
 
     public Carta() {
         // Construtor vazio
     }
 
-    public Carta(String name, String manaCost, double cmc, String[] colors, String type, String description, String power, String toughness) {
+    public Carta(Long id, String name, String manaCost, double cmc, String[] colors, String type, String description, String power, String toughness, Deck deck) {
+        this.id = id;
         this.name = name;
         this.manaCost = manaCost;
         this.cmc = cmc;
@@ -25,6 +48,17 @@ public class Carta {
         this.description = description;
         this.power = power;
         this.toughness = toughness;
+        this.deck = deck;
+    }
+
+    public Long getid()
+    {
+        return id;
+    }
+
+    public void setId(Long id) {
+
+        this.id = id;
     }
 
     public String getName() {
@@ -89,5 +123,11 @@ public class Carta {
 
     public void setToughness(String toughness) {
         this.toughness = toughness;
+    }
+
+    public Deck getDeck() { return deck; }
+
+    public void setDeck(Deck deck) {
+        this.deck = deck;
     }
 }

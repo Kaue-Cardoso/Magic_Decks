@@ -3,6 +3,7 @@ package service;
 import io.magicthegathering.javasdk.api.CardAPI;
 import io.magicthegathering.javasdk.resource.Card;
 import model.Carta;
+import model.Deck;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -61,7 +62,7 @@ public class CartaService {
         if (card == null) {
             return null;
         }
-        return new Carta(
+        return new Carta(null,
                 card.getName(),
                 card.getManaCost(),
                 card.getCmc(),
@@ -69,7 +70,8 @@ public class CartaService {
                 card.getType(),
                 card.getText(),
                 card.getPower(),
-                card.getToughness()
+                card.getToughness(),
+                null
         );
     }
 }

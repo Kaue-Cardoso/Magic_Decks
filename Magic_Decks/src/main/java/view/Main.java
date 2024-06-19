@@ -24,7 +24,7 @@ public class Main {
 
             switch (opcao) {
                 case 1:
-                    adicionarDeck();
+                    create();
                     break;
                 case 2:
                     selecionarDeckParaEditar();
@@ -44,27 +44,28 @@ public class Main {
         }
     }
 
-    private static void adicionarDeck() {
+    private static void create() {
         System.out.println("Digite o nome do novo deck:");
         String nome = scanner.nextLine();
-        Deck deck = new Deck(nome);
-        deckRepository.adicionarDeck(deck);
+        Deck deck = new Deck(null, nome,null);
+        deckRepository.create(deck);
         System.out.println("Deck '" + nome + "' adicionado com sucesso.");
     }
 
     private static void selecionarDeckParaEditar() {
-        if (deckRepository.isEmpty()) {
+        if (deckRepository.findAll()==null) {
             System.out.println("Nenhum deck disponível para editar.");
             return;
         }
 
         System.out.println("Selecione o deck para editar:");
-        listarDecks();
-
-        int indiceDeck = scanner.nextInt();
+        for (var x : deckRepository.findAll()){
+            System.out.println(x.getId() +" - "+ x.getNome());
+        }
+        long indiceDeck = scanner.nextLong();
         scanner.nextLine(); // Limpar o buffer do scanner
 
-        Deck deck = deckRepository.obterDeck(indiceDeck);
+        Deck deck = (Deck)deckRepository.findById(indiceDeck);
         if (deck == null) {
             System.out.println("Índice inválido.");
             return;
@@ -74,38 +75,38 @@ public class Main {
     }
 
     private static void apagarDeck() {
-        if (deckRepository.isEmpty()) {
+        if (deckRepository.findAll()==null) {
             System.out.println("Nenhum deck disponível para apagar.");
             return;
         }
 
         System.out.println("Selecione o deck para apagar:");
-        listarDecks();
+        for (var x : deckRepository.findAll()){
+            System.out.println(x.getId() +" - "+ x.getNome() + " " + x.getCartas().size());
+        }
 
-        int indiceDeck = scanner.nextInt();
+        long indiceDeck = scanner.nextLong();
         scanner.nextLine(); // Limpar o buffer do scanner
 
-        Deck deck = deckRepository.obterDeck(indiceDeck);
+        Deck deck = (Deck)deckRepository.findById(indiceDeck);
         if (deck == null) {
             System.out.println("Índice inválido.");
             return;
         }
 
-        deckRepository.apagarDeck(indiceDeck);
+        deckRepository.delete(indiceDeck);
         System.out.println("Deck '" + deck.getNome() + "' apagado com sucesso.");
     }
 
     private static void listarDecks() {
-        List<Deck> decks = deckRepository.listarDecks();
-        if (decks.isEmpty()) {
+        if (deckRepository.findAll()==null) {
             System.out.println("Nenhum deck criado.");
             return;
         }
 
         System.out.println("Decks criados:");
-        for (int i = 0; i < decks.size(); i++) {
-            Deck deck = decks.get(i);
-            System.out.println(i + " - " + deck.getNome() + " (Quantidade de cartas: " + deck.getCartas().size() + ")");
+        for (var x : deckRepository.findAll()){
+            System.out.println(x.getId() +" - "+ x.getNome() + " " + x.getCartas().size());
         }
     }
-}
+    }
