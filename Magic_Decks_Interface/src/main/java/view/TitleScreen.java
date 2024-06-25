@@ -4,6 +4,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URL;
 
 public class TitleScreen extends JFrame {
 
@@ -22,9 +23,14 @@ public class TitleScreen extends JFrame {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
                 // Carregar e desenhar imagem de fundo
-                ImageIcon imageIcon = new ImageIcon("E:\\Github\\Magic_Decks\\Magic_Decks\\src\\main\\java\\image\\ikoria.jpg"); // Substitua com o caminho da sua imagem
-                Image image = imageIcon.getImage();
-                g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+                URL imageUrl = getClass().getClassLoader().getResource("image/ikoria.jpg");
+                if (imageUrl != null) {
+                    ImageIcon imageIcon = new ImageIcon(imageUrl);
+                    Image image = imageIcon.getImage();
+                    g.drawImage(image, 0, 0, getWidth(), getHeight(), this);
+                } else {
+                    System.err.println("Imagem não encontrada.");
+                }
             }
         };
         panel.setLayout(new GridBagLayout());

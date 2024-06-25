@@ -5,17 +5,20 @@ import model.Carta;
 import model.Deck;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.List;
+import java.net.URL;
 
 public class DeckViewGUI extends JFrame {
-
     private Deck deck;
     private JTable cartaTable;
+    private JLabel cardLabel; // Label para exibir a imagem da carta
+    private ImageIcon defaultCardImage; // Imagem padrão
 
     public DeckViewGUI(Deck deck) {
         this.deck = deck;
@@ -28,20 +31,45 @@ public class DeckViewGUI extends JFrame {
     }
 
     private void initComponents() {
-        // Panel com imagem de fundo
-        ImageIcon backgroundImage = new ImageIcon("E:\\Github\\Magic_Decks\\Magic_Decks\\src\\main\\java\\image\\ikoria2.jpg");
-        BackgroundPanel backgroundPanel = new BackgroundPanel(backgroundImage.getImage());
+        URL backgroundUrl = getClass().getClassLoader().getResource("image/ikoria2.jpg");
+        ImageIcon backgroundImage = null;
+        if (backgroundUrl != null) {
+            backgroundImage = new ImageIcon(backgroundUrl);
+        } else {
+            System.err.println("Imagem de fundo não encontrada.");
+        }
+
+        BackgroundPanel backgroundPanel = new BackgroundPanel(backgroundImage != null ? backgroundImage.getImage() : null);
         backgroundPanel.setLayout(new GridBagLayout());
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(10, 10, 10, 10);
+
+        // Carregar imagem padrão
+        URL defaultCardUrl = getClass().getClassLoader().getResource("image/card.jpg");
+        if (defaultCardUrl != null) {
+            defaultCardImage = new ImageIcon(defaultCardUrl);
+        } else {
+            System.err.println("Imagem padrão não encontrada.");
+            defaultCardImage = new ImageIcon(); // ou atribua null se preferir
+        }
 
         // Tabela de Cartas
         cartaTable = new JTable();
         cartaTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        // Aplicando o renderizador de células personalizado
-        CustomTableCellRenderer cellRenderer = new CustomTableCellRenderer();
-        cartaTable.setDefaultRenderer(Object.class, cellRenderer);
+        // Adiciona um listener para seleção de linhas na tabela
+        cartaTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent event) {
+                if (!event.getValueIsAdjusting()) {
+                    int selectedRow = cartaTable.getSelectedRow();
+                    if (selectedRow >= 0) {
+                        Carta carta = deck.getCartas().get(selectedRow);
+                        exibirImagemCarta(carta.getImageUrl());
+                    }
+                }
+            }
+        });
 
         JScrollPane scrollPane = new JScrollPane(cartaTable);
         scrollPane.setPreferredSize(new Dimension(500, 300));
@@ -53,12 +81,13 @@ public class DeckViewGUI extends JFrame {
         constraints.weighty = 1.0;
         backgroundPanel.add(scrollPane, constraints);
 
-        // Adicionar imagem ao lado da tabela
-        ImageIcon magicCardImage = new ImageIcon("E:\\Github\\Magic_Decks\\Magic_Decks\\src\\main\\java\\image\\card.jpg");
-        JLabel cardLabel = new JLabel(magicCardImage);
+        cardLabel = new JLabel(defaultCardImage);
         constraints.gridx = 1;
         constraints.gridy = 0;
         constraints.gridheight = 1; // A imagem ocupará uma linha
+        constraints.weightx = 0.5; // Peso horizontal para a imagem
+        constraints.weighty = 0.5; // Peso vertical para a imagem
+        constraints.fill = GridBagConstraints.BOTH;
         backgroundPanel.add(cardLabel, constraints);
 
         // Botão Adicionar Carta
@@ -85,6 +114,18 @@ public class DeckViewGUI extends JFrame {
         constraints.gridy = 2;
         backgroundPanel.add(removeButton, constraints);
 
+        // Botão Salvar Deck
+        JButton saveButton = new JButton("Salvar Deck");
+        saveButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                salvarDeck();
+            }
+        });
+        constraints.gridx = 1;
+        constraints.gridy = 3;
+        backgroundPanel.add(saveButton, constraints);
+
         // Adicionando o painel de fundo ao JFrame
         add(backgroundPanel);
 
@@ -100,7 +141,9 @@ public class DeckViewGUI extends JFrame {
                 CartaController cartaController = new CartaController();
                 Carta carta = cartaController.buscaCartaId(multiverseId);
                 if (carta != null) {
-                    deck.adicionarCarta(carta);
+                    carta.setDeck(deck); // Associa a carta ao deck atual
+                    deck.adicionarCarta(carta); // Adiciona a carta ao deck
+                    cartaController.salvarCarta(carta); // Salva a carta no banco de dados
                     listarCartas(); // Atualiza a lista de cartas após adicionar
                     JOptionPane.showMessageDialog(this, "Carta '" + carta.getName() + "' adicionada ao deck.");
                 } else {
@@ -119,7 +162,11 @@ public class DeckViewGUI extends JFrame {
             return;
         }
 
+        Carta carta = deck.getCartas().get(selectedRow);
+        carta.setDeck(null); // Desassocia a carta do deck
         deck.getCartas().remove(selectedRow);
+        CartaController cartaController = new CartaController();
+        cartaController.salvarCarta(carta); // Atualiza a carta no banco de dados
         listarCartas(); // Atualiza a lista de cartas após remover
         JOptionPane.showMessageDialog(this, "Carta removida do deck.");
     }
@@ -141,7 +188,7 @@ public class DeckViewGUI extends JFrame {
             data[i][4] = carta.getType();
             data[i][5] = carta.getDescription();
             data[i][6] = carta.getPower();
-            data[i][7] = carta.getToughness();// Ajuste conforme seus atributos
+            data[i][7] = carta.getToughness(); // Ajuste conforme seus atributos
 
             // Adicionar mais campos conforme necessário
         }
@@ -151,22 +198,36 @@ public class DeckViewGUI extends JFrame {
         cartaTable.setModel(model);
     }
 
-    // Renderizador de células personalizado para alternar cores de fundo das linhas
-    private class CustomTableCellRenderer extends DefaultTableCellRenderer {
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            Component rendererComponent = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-            // Definindo cores alternadas para cada linha
-            if (row % 2 == 0) {
-                rendererComponent.setBackground(Color.decode("#F9E8D9")); // Cor de fundo para linhas pares
-            } else {
-                rendererComponent.setBackground(Color.decode("#F7B787")); // Cor de fundo para linhas ímpares
+    private void salvarDeck() {
+        int option = JOptionPane.showConfirmDialog(this, "Deseja salvar as alterações no deck?", "Salvar Deck", JOptionPane.YES_NO_OPTION);
+        if (option == JOptionPane.YES_OPTION) {
+            CartaController cartaController = new CartaController();
+            for (Carta carta : deck.getCartas()) {
+                cartaController.salvarCarta(carta); // Salva cada carta no banco de dados
             }
-
-            return rendererComponent;
+            JOptionPane.showMessageDialog(this, "Deck salvo com sucesso.");
         }
     }
+
+    private void exibirImagemCarta(String imageUrl) {
+        try {
+            System.out.println("Tentando carregar a imagem da URL: " + imageUrl);
+            URL url = new URL(imageUrl);
+            ImageIcon cardImage = new ImageIcon(url);
+            if (cardImage.getIconWidth() > 0) {
+                cardLabel.setIcon(cardImage);
+                cardLabel.setText(null); // Remove qualquer texto que possa estar presente
+                System.out.println("Imagem carregada com sucesso.");
+            } else {
+                throw new Exception("Imagem não foi carregada corretamente.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            cardLabel.setIcon(defaultCardImage); // Volta para a imagem padrão em caso de erro
+            cardLabel.setText("Imagem não disponível: " + e.getMessage());
+        }
+    }
+
 
     // JPanel personalizado para fundo com imagem
     private static class BackgroundPanel extends JPanel {
@@ -188,10 +249,9 @@ public class DeckViewGUI extends JFrame {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                // Exemplo de uso
-                Deck deck = new Deck(); // Crie um deck como exemplo
-                deck.setNome("Meu Deck");
-                DeckViewGUI deckViewGUI = new DeckViewGUI(deck);
+                // Exemplo de inicialização do deck (substitua pelo seu próprio método de inicialização)
+                Deck deck = new Deck();
+                new DeckViewGUI(deck);
             }
         });
     }
