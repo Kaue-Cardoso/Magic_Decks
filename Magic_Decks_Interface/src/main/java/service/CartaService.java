@@ -7,7 +7,10 @@ import javax.persistence.Persistence;
 import io.magicthegathering.javasdk.api.CardAPI;
 import io.magicthegathering.javasdk.resource.Card;
 import model.Carta;
-import model.Deck;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class CartaService {
 
@@ -44,12 +47,24 @@ public class CartaService {
         if (card == null) {
             return null;
         }
-        return new Carta(null,
+
+        List<String> colors = new ArrayList<>();
+        if (card.getColors() != null) {
+            colors.addAll(Arrays.asList(card.getColors()));
+        }
+
+        List<String> types = new ArrayList<>();
+        if (card.getTypes() != null && card.getTypes().length > 0) {
+            types.addAll(Arrays.asList(card.getTypes()));
+        }
+
+        return new Carta(
+                null,
                 card.getName(),
                 card.getManaCost(),
                 card.getCmc(),
-                card.getColors(), //card.getColors(),
-                card.getType(),
+                colors,
+                types,
                 card.getText(),
                 card.getPower(),
                 card.getToughness(),
@@ -68,5 +83,4 @@ public class CartaService {
             em.getTransaction().rollback();
         }
     }
-
 }

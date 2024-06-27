@@ -1,12 +1,11 @@
 package repository;
 
+public interface BasicCrud<T> {
+    T create(T object);
 
-public interface BasicCrud {
-    Object create(Object object);
+    T findById(Long id);
 
-    Object findById(Long id);
-
-    Object updateById(Object object);
+    T update(T object);
 
     void delete(Long id);
 }

@@ -1,7 +1,7 @@
 package view;
 
+import controller.DeckController;
 import model.Deck;
-import repository.DeckRepository;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -13,21 +13,18 @@ import java.net.URL;
 import java.util.List;
 
 public class MainGUI extends JFrame {
-
-    private DeckRepository deckRepository = new DeckRepository();
+    private DeckController deckController = new DeckController();
     private JTable deckTable;
     private BackgroundPanel backgroundPanel;
 
     public MainGUI() {
-        // Alterar aparência e sensação para Nimbus
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
                     UIManager.setLookAndFeel(info.getClassName());
 
-                    // Personalização da cor da barra de título (opcional)
                     if (info.getName().contains("Nimbus")) {
-                        UIManager.put("nimbusBlueGrey", new Color(82, 120, 83)); // Cor de fundo do Nimbus
+                        UIManager.put("nimbusBlueGrey", new Color(82, 120, 83));
                     }
 
                     break;
@@ -39,14 +36,23 @@ public class MainGUI extends JFrame {
 
         initComponents();
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1080, 640); // Ajustando o tamanho para acomodar a imagem ao lado da tabela
+        setSize(1080, 640);
         setLocationRelativeTo(null);
         setTitle("Menu Principal");
+
+        // Carregar e definir o ícone do programa
+        URL iconURL = getClass().getClassLoader().getResource("image/card.jpg");
+        if (iconURL != null) {
+            ImageIcon icon = new ImageIcon(iconURL);
+            setIconImage(icon.getImage());
+        } else {
+            System.err.println("Ícone do programa não encontrado.");
+        }
+
         setVisible(true);
     }
 
     private void initComponents() {
-        // Carregando imagem de fundo
         URL backgroundUrl = getClass().getClassLoader().getResource("image/ikoria.jpg");
         ImageIcon backgroundImage = null;
         if (backgroundUrl != null) {
@@ -60,64 +66,59 @@ public class MainGUI extends JFrame {
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(10, 10, 10, 10);
 
-        // Carregando imagem de uma carta de Magic
         URL cardImageUrl = getClass().getClassLoader().getResource("image/card.jpg");
         if (cardImageUrl != null) {
             ImageIcon magicCardImage = new ImageIcon(cardImageUrl);
             JLabel cardLabel = new JLabel(magicCardImage);
             constraints.gridx = 0;
             constraints.gridy = 0;
-            constraints.gridheight = 2; // A imagem ocupará duas linhas
+            constraints.gridheight = 1;
             backgroundPanel.add(cardLabel, constraints);
         } else {
             System.err.println("Imagem da carta não encontrada.");
         }
 
-        // Criação da tabela
         deckTable = new JTable();
         deckTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        // Aplicando o renderizador de células personalizado
         CustomTableCellRenderer cellRenderer = new CustomTableCellRenderer();
         deckTable.setDefaultRenderer(Object.class, cellRenderer);
 
         JScrollPane scrollPane = new JScrollPane(deckTable);
         constraints.gridx = 1;
         constraints.gridy = 0;
-        constraints.gridheight = 1; // A tabela ocupará apenas uma linha
-        constraints.gridwidth = 2; // Abrange duas colunas
+        constraints.gridheight = 1;
+        constraints.gridwidth = 2;
         constraints.fill = GridBagConstraints.BOTH;
         constraints.weightx = 1.0;
         constraints.weighty = 1.0;
         backgroundPanel.add(scrollPane, constraints);
 
-        // Resetando as restrições
         constraints.gridwidth = 1;
         constraints.fill = GridBagConstraints.NONE;
         constraints.weightx = 0;
         constraints.weighty = 0;
-        constraints.anchor = GridBagConstraints.CENTER; // Centraliza os componentes
+        constraints.anchor = GridBagConstraints.CENTER;
 
-        // Botão de atualização
         JButton updateButton = new JButton("Atualizar");
-        updateButton.setBackground(Color.decode("#EE7214")); // Cor do botão
+        updateButton.setBackground(Color.decode("#EE7214"));
         updateButton.setForeground(Color.BLACK);
         updateButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                listarDecks(); // Atualiza a tabela de decks
+                listarDecks();
             }
         });
         constraints.gridx = 1;
         constraints.gridy = 2;
-        constraints.fill = GridBagConstraints.BOTH; // Preenchimento horizontal
-        constraints.weightx = 1.0; // Expandir horizontalmente
-        constraints.weighty = 1.0; // Expandir horizontalmente
-        constraints.anchor = GridBagConstraints.CENTER; // Ancoragem ao centro
+        constraints.fill = GridBagConstraints.BOTH;
+        constraints.weightx = 1.0;
+        constraints.weighty = 1.0;
+        constraints.anchor = GridBagConstraints.CENTER;
         backgroundPanel.add(updateButton, constraints);
 
         JButton editButton = new JButton("Editar Deck");
-        editButton.setBackground(Color.decode("#EE7214")); // Cor verde limão
+        editButton.setBackground(Color.decode("#EE7214"));
         editButton.setForeground(Color.BLACK);
         editButton.addActionListener(new ActionListener() {
             @Override
@@ -130,7 +131,7 @@ public class MainGUI extends JFrame {
         backgroundPanel.add(editButton, constraints);
 
         JButton addButton = new JButton("Adicionar Deck");
-        addButton.setBackground(Color.decode("#EE7214")); // Cor azul marinho
+        addButton.setBackground(Color.decode("#EE7214"));
         addButton.setForeground(Color.BLACK);
         addButton.addActionListener(new ActionListener() {
             @Override
@@ -143,7 +144,7 @@ public class MainGUI extends JFrame {
         backgroundPanel.add(addButton, constraints);
 
         JButton deleteButton = new JButton("Apagar Deck");
-        deleteButton.setBackground(Color.decode("#EE7214")); // Cor laranja vermelho
+        deleteButton.setBackground(Color.decode("#EE7214"));
         deleteButton.setForeground(Color.BLACK);
         deleteButton.addActionListener(new ActionListener() {
             @Override
@@ -156,7 +157,7 @@ public class MainGUI extends JFrame {
         backgroundPanel.add(deleteButton, constraints);
 
         JButton exitButton = new JButton("Sair");
-        exitButton.setBackground(Color.decode("#EE7214")); // Cor ouro
+        exitButton.setBackground(Color.decode("#EE7214"));
         exitButton.setForeground(Color.BLACK);
         exitButton.addActionListener(new ActionListener() {
             @Override
@@ -170,16 +171,16 @@ public class MainGUI extends JFrame {
 
         add(backgroundPanel);
 
-        listarDecks(); // Carrega os decks na tabela ao iniciar
+        listarDecks();
     }
 
     private void adicionarDeck() {
         String nome = JOptionPane.showInputDialog(this, "Digite o nome do novo deck:");
         if (nome != null && !nome.isEmpty()) {
-            Deck deck = new Deck(null, nome, null); // Você precisa ajustar isso conforme sua classe Deck
-            deckRepository.create(deck);
+            Deck deck = new Deck(null, nome, null);
+            deckController.criarDeck(deck);
             JOptionPane.showMessageDialog(this, "Deck '" + nome + "' adicionado com sucesso.");
-            listarDecks(); // Atualiza a tabela após adicionar
+            listarDecks();
         }
     }
 
@@ -191,7 +192,7 @@ public class MainGUI extends JFrame {
         }
 
         Long deckId = (Long) deckTable.getValueAt(selectedRow, 0);
-        Deck deck = (Deck) deckRepository.findById(deckId);
+        Deck deck = deckController.encontrarDeckPorId(deckId);
         if (deck != null) {
             new DeckViewGUI(deck);
         } else {
@@ -207,68 +208,58 @@ public class MainGUI extends JFrame {
         }
 
         Long deckId = (Long) deckTable.getValueAt(selectedRow, 0);
-        deckRepository.delete(deckId);
-        JOptionPane.showMessageDialog(this, "Deck apagado com sucesso.");
-        listarDecks(); // Atualiza a tabela após apagar
+        int confirmation = JOptionPane.showConfirmDialog(this, "Tem certeza que deseja apagar o deck?", "Confirmação", JOptionPane.YES_NO_OPTION);
+        if (confirmation == JOptionPane.YES_OPTION) {
+            deckController.deletarDeck(deckId);
+            JOptionPane.showMessageDialog(this, "Deck apagado com sucesso.");
+            listarDecks();
+        }
     }
 
     private void listarDecks() {
-        List<Deck> decks = deckRepository.findAll();
+        List<Deck> decks = deckController.listarTodosDecks();
+        DefaultTableModel tableModel = new DefaultTableModel(new Object[]{"ID", "Nome", "Data de Criação", "Quantidade de Cartas"}, 0);
 
-        String[] columnNames = {"ID", "Nome", "Quantidade de Cartas", "Data de Criação"};
-        Object[][] data = new Object[decks.size()][4];
-
-        for (int i = 0; i < decks.size(); i++) {
-            Deck deck = decks.get(i);
-            data[i][0] = deck.getId();
-            data[i][1] = deck.getNome();
-            data[i][2] = (deck.getCartas() != null) ? deck.getCartas().size() : 0;
-            data[i][3] = deck.getDataCriacao(); // Ajuste conforme o campo da data de criação
+        for (Deck deck : decks) {
+            // Carregar cartas para garantir a contagem correta
+            deck.getCartas().size();
+            tableModel.addRow(new Object[]{deck.getId(), deck.getNome(), deck.getDataCriacao(), deck.getCartas().size()});
         }
 
-        DefaultTableModel model = new DefaultTableModel(data, columnNames);
-        deckTable.setModel(model);
-    }
-
-    // Renderizador de células personalizado para alternar cores de fundo das linhas
-    private static class CustomTableCellRenderer extends DefaultTableCellRenderer {
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            Component rendererComponent = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-            // Definindo cores alternadas para cada linha
-            if (row % 2 == 0) {
-                rendererComponent.setBackground(Color.decode("#F9E8D9")); // Cor de fundo para linhas pares
-            } else {
-                rendererComponent.setBackground(Color.decode("#F7B787")); // Cor de fundo para linhas ímpares
-            }
-
-            return rendererComponent;
-        }
-    }
-
-    // JPanel personalizado para fundo com imagem
-    private static class BackgroundPanel extends JPanel {
-        private Image backgroundImage;
-
-        public BackgroundPanel(Image backgroundImage) {
-            this.backgroundImage = backgroundImage;
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            if (backgroundImage != null) {
-                g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
-            }
-        }
+        deckTable.setModel(tableModel);
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 new MainGUI();
             }
         });
+    }
+}
+
+class CustomTableCellRenderer extends DefaultTableCellRenderer {
+    @Override
+    public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+        super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+        setHorizontalAlignment(CENTER);
+        return this;
+    }
+}
+
+class BackgroundPanel extends JPanel {
+    private Image backgroundImage;
+
+    public BackgroundPanel(Image backgroundImage) {
+        this.backgroundImage = backgroundImage;
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g);
+        if (backgroundImage != null) {
+            g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
+        }
     }
 }

@@ -37,14 +37,23 @@ public class TitleScreen extends JFrame {
         GridBagConstraints constraints = new GridBagConstraints();
         constraints.insets = new Insets(10, 10, 10, 10);
 
-        JLabel titleLabel = new JLabel("Bem-vindo ao Meu Programa!");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 30));
-        titleLabel.setForeground(Color.black); // Cor do texto
-        constraints.gridx = 0;
-        constraints.gridy = 0;
-        constraints.gridwidth = 2;
-        constraints.anchor = GridBagConstraints.CENTER;
-        panel.add(titleLabel, constraints);
+        // Adicionar imagem em vez da mensagem de texto
+        URL titleImageUrl = getClass().getClassLoader().getResource("image/MagicLogo.png");
+        if (titleImageUrl != null) {
+            ImageIcon titleImageIcon = new ImageIcon(titleImageUrl);
+            Image titleImage = titleImageIcon.getImage();
+            // Redimensionar a imagem, se necessário
+            Image resizedTitleImage = titleImage.getScaledInstance(500, 170, Image.SCALE_SMOOTH);
+            titleImageIcon = new ImageIcon(resizedTitleImage);
+            JLabel titleImageLabel = new JLabel(titleImageIcon);
+            constraints.gridx = 0;
+            constraints.gridy = 0;
+            constraints.gridwidth = 2;
+            constraints.anchor = GridBagConstraints.CENTER;
+            panel.add(titleImageLabel, constraints);
+        } else {
+            System.err.println("Imagem de título não encontrada.");
+        }
 
         JButton entrarButton = new JButton("Entrar");
         entrarButton.setBackground(Color.decode("#EE7214")); // Cor do botão

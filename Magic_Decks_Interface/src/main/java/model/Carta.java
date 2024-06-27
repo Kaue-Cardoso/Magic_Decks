@@ -2,8 +2,6 @@ package model;
 
 import javax.persistence.*;
 import java.util.List;
-import javax.persistence.Table;
-import javax.persistence.Entity;
 
 @Entity
 @Table(name = "Carta")
@@ -22,11 +20,15 @@ public class Carta {
     @Column(name = "cmc")
     private double cmc;
 
-    @Column(name = "colors")
-    private String[] colors;
+    @ElementCollection
+    @CollectionTable(name = "carta_colors", joinColumns = @JoinColumn(name = "carta_id"))
+    @Column(name = "color")
+    private List<String> colors;
 
+    @ElementCollection
+    @CollectionTable(name = "carta_types", joinColumns = @JoinColumn(name = "carta_id"))
     @Column(name = "type")
-    private String type;
+    private List<String> types;
 
     @Column(name = "description")
     private String description;
@@ -44,18 +46,18 @@ public class Carta {
     @JoinColumn(name = "fk_deck_id")
     private Deck deck;
 
-    // Construtores, getters e setters
+    // Construtor vazio
     public Carta() {
-        // Construtor vazio
     }
 
-    public Carta(Long id, String name, String manaCost, double cmc, String[] colors, String type, String description, String power, String toughness, String imageUrl, Deck deck) {
+    // Construtor com os campos relevantes para criação
+    public Carta(Long id, String name, String manaCost, double cmc, List<String> colors, List<String> types, String description, String power, String toughness, String imageUrl, Deck deck) {
         this.id = id;
         this.name = name;
         this.manaCost = manaCost;
         this.cmc = cmc;
         this.colors = colors;
-        this.type = type;
+        this.types = types;
         this.description = description;
         this.power = power;
         this.toughness = toughness;
@@ -95,22 +97,21 @@ public class Carta {
         this.cmc = cmc;
     }
 
-    public String[] getColors() {
+    public List<String> getColors() {
         return colors;
     }
 
-    public void setColors(String[] colors) {
+    public void setColors(List<String> colors) {
         this.colors = colors;
     }
 
-    public String getType() {
-        return type;
+    public List<String> getTypes() {
+        return types;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public void setTypes(List<String> types) {
+        this.types = types;
     }
-
     public String getDescription() {
         return description;
     }
